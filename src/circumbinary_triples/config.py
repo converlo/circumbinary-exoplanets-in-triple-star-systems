@@ -91,17 +91,6 @@ def __post_init__(self):
     if self.R_A <= 0 or self.R_B <= 0:
         raise ValueError("Stellar radii must be positive.")
 
-    @property
-    def mAB(self) -> float:
-        return self.m_A + self.m_B
-
-    @property
-    def muA(self) -> float:
-        return self.m_A / self.mAB
-
-    @property
-    def muB(self) -> float:
-        return self.m_B / self.mAB
 
 @dataclass(frozen=True)
 class CompanionConfig:
@@ -115,6 +104,7 @@ def __post_init__(self):
         raise ValueError("Companion mass must be positive.")
     if self.R_C <= 0:
         raise ValueError("Companion radius must be positive.")
+
 
 @dataclass(frozen=True)
 class PlanetConfig:
@@ -142,6 +132,76 @@ class SystemConfig:
     binary: BinaryConfig
     planet: PlanetConfig
     companion: CompanionConfig
+
+    @property
+    def mAB(self) -> float:
+        return self.binary.m_A + self.binary.m_B
+
+    @property
+    def muA(self) -> float:
+        return self.binary.m_A / self.mAB
+
+    @property
+    def muB(self) -> float:
+        return self.binary.m_B / self.mAB
+
+    @property
+    def muC(self) -> float:
+        return self.companion.m_C / (self.mAB + self.companion.m_C)
+
+    def luminosities(self) -> tuple[float, float, float]:
+        """Return luminosities of the three stars in solar units."""
+        from circumbinary_triples.radiation.luminosity import luminosity
+
+        return np.array([
+            luminosity(self.binary.m_A),
+            luminosity(self.binary.m_B),
+            luminosity(self.companion.m_C),
+        ])
+
+    def holman_wiegert(self) -> tuple[float, float]:
+        """Return approximate inner and outer stability limits (AU).
+
+        Returns
+        -------
+        a_min : float
+            Inner P-type stability limit around binary AB.
+        a_max : float
+            Outer S-type stability limit around AB.
+        """
+
+        # Inner P-type stability limit: AB + planet
+        aAB = self.binary.orbit.a
+        eAB = self.binary.orbit.e
+
+        # Holman & Wiegert convention: mass of the lighter star / total mass
+        mu = min(self.muA, self.muB)
+
+        a_min = aAB * (
+            1.60
+            + 5.10 * eAB
+            - 2.22 * eAB**2
+            + 4.12 * mu
+            - 4.27 * eAB * mu
+            - 5.09 * mu**2
+            + 4.61 * eAB**2 * mu**2
+        )
+
+        # Outer S-type stability limit: AB + C
+        aC = self.companion.orbit.a
+        eC = self.companion.orbit.e
+        muC = self.muC
+
+        a_max = aC * (
+            0.464
+            - 0.380 * muC
+            - 0.631 * eC
+            + 0.586 * muC * eC
+            + 0.150 * eC**2
+            - 0.198 * muC * eC**2
+        )
+
+        return a_min, a_max
 
 @dataclass(frozen=True)
 class Trajectory:

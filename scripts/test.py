@@ -20,19 +20,17 @@ system = ct.SystemConfig(
 )
  
 # --- Réglages du balayage ---------------------------------------------------
-A_MIN, A_MAX, N_POINTS = 0.5, 20.0, 24     # a_p (AU)
-N_ORBITS = 1000                              # périodes planétaires intégrées
+A_MIN, A_MAX, N_POINTS = 0.5, 20.0, 100     # a_p (AU)
+N_ORBITS = 100                              # périodes planétaires intégrées
 RES_ORBITS = 10000                           # instantanés par intégration
-N_REAL = 20                                 # réalisations de phases par a_p
-Q = 0.9                                     # seuil de la zone stable
+N_REAL = 10                                 # réalisations de phases par a_p
 # -----------------------------------------------------------------------------
- 
- 
+
+
 def simulate(system, rng):
     system = ct.random_phases(system, rng)
     sim = ct.sim_parameters(ct.build_system(system))
     return ct.trajectory(sim, n_orbits=N_ORBITS, res_orbits=RES_ORBITS)
- 
  
 observables = {
     "t": lambda system, traj: traj.t,
@@ -41,29 +39,36 @@ observables = {
     "T_std": lambda system, traj: ct.std_temperature(system, traj),
     "Stability": lambda system, traj: ct.is_stable(system, traj),
 }
- 
+
 axis = ct.SweepAxis.lin("planet.orbit.a", A_MIN, A_MAX, N_POINTS)
- 
+
 results = ct.sweep(system, axis, simulate=simulate, observables=observables,
                    n_realizations=N_REAL, seed=12345)
- 
+
 a_p = np.array(axis.values)
 stab = results.array("Stability")           # (n_points, n_real) de 0/1
 f_stable = stab.mean(axis=1)                # fraction stable par a_p
- 
+
 t = results.array("t")[:, 0, :]             # réalisation 0, (n_points, n_times)
 T = results.array("T")[:, 0, :]
- 
+
 # --- 1. Fraction stable -------------------------------------------------------
+a_min, a_max = system.holman_wiegert()
+
 fig_s, ax_s = plt.subplots(figsize=(8, 4))
-ax_s.bar(a_p, f_stable, width=0.8 * (a_p[1] - a_p[0]),
-         color="steelblue", edgecolor="black")
-ax_s.axhline(Q, color="red", ls="--", label=f"q = {Q}")
+ax_s.plot(a_p, f_stable, lw=3, color="steelblue", markersize=5)
+
+ax_s.axvline(a_min, color="red", linestyle="--", linewidth=1.5, label=rf"$a_{{\mathrm{{HW,min}}}} = {a_min:.2f}$ AU")
+ax_s.axvline(a_max, color="darkorange", linestyle="--", linewidth=1.5, label=rf"$a_{{\mathrm{{HW,max}}}} = {a_max:.2f}$ AU")
+
 ax_s.set_xlabel("a_p (AU)")
 ax_s.set_ylabel("Stable fraction")
-ax_s.set_ylim(0, 1)
+ax_s.set_ylim(0, 1.1)
 ax_s.legend()
- 
+
+plt.show()
+
+'''
 # --- 2. T(t) pour les orbites stables (réalisation 0) --------------------------
 stable_idx = [k for k in range(len(a_p)) if stab[k, 0] == 1]
  
@@ -78,7 +83,7 @@ if stable_idx:
     ax_T.legend(bbox_to_anchor=(1.02, 1), loc="upper left", borderaxespad=0)
 else:
     print("Aucune orbite stable pour la réalisation 0")
- 
+
 ax_T.set_xlabel("Time (yr)")
 ax_T.set_ylabel("Temperature (°C)")
 fig_T.tight_layout()
@@ -102,5 +107,6 @@ fig_stdT, ax_stdT = plt.subplots(figsize=(6, 4))
 ax_stdT.plot(a_p, T_std_a, lw=1, color="red", marker="+", markersize=5)
 ax_stdT.set_xlabel("a_p (AU)")
 ax_stdT.set_ylabel("Temperature standard deviation (K)")
- 
+
 plt.show()
+'''

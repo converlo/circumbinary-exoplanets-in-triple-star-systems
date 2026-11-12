@@ -1,6 +1,6 @@
 """
-Test file to simulate WDS 08403+1921 system using REBOUND. The WDS 08403+1921 system is a hierarchical triple star system with an inner binary star system named AB and third companion star C, the system has the following parameters:
-m_A = 1.65 M⊙, m_B = 1.51 M⊙, m_C = 2.26 M⊙, a_AB = 0.384 au, a_C = 26.17 au, e_AB = 0.11, e_C = 0.169, P_AB ≈50 day, P_C ≈57.5 yr
+Test file to simulate WDS 08403+1921 system (2024 data) using REBOUND. The WDS 08403+1921 system is a hierarchical triple star system with an inner binary star system named AB and third companion star C, the system has the following parameters:
+m_A = 1.65 M⊙, m_B = 1.51 M⊙, m_C = 2.26 M⊙, a_AB = 0.384 au, a_C = 26.17 au, e_AB = 0.11, e_C = 0.169, P_AB ≈50 day, P_C ≈57.5 yr.
 """
 
 import rebound

@@ -1,14 +1,9 @@
-from circumbinary_triples.radiation.luminosity import luminosity
 from circumbinary_triples.constants import (L_SUN, SIGMA, AU)
 
 import numpy as np
 
 def temperature(system, position):
-    L = np.array([
-        luminosity(system.binary.m_A),
-        luminosity(system.binary.m_B),
-        luminosity(system.companion.m_C),
-    ])
+    L = system.luminosities()  # (L_A, L_B, L_C) in solar units
 
     stars = position.pos[:, [0, 1, 3], :]
     planet = position.pos[:, 2:3, :]
