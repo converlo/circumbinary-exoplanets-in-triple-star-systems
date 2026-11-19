@@ -17,3 +17,22 @@ def is_stable(system, trajectory):
         return 0   
 
     return 1
+
+def e_p(system, trajectory):
+    e_p = trajectory.e[:, 2, 0]
+    return e_p
+
+def a_p(system, trajectory):
+    a_p = trajectory.a[:, 2, 0]
+    return a_p
+
+def delta_a(system, trajectory):
+    a_p = trajectory.a[:, 2, 0]
+    delta_a = np.max(a_p) - np.min(a_p)
+    return delta_a
+
+def delta_e(system, trajectory):
+    e_p = trajectory.e[:, 2, 0]
+    delta_e = np.max(e_p) - np.min(e_p)
+    return delta_e
+

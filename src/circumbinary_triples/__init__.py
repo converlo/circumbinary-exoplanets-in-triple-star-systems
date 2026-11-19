@@ -17,6 +17,6 @@ from .analytic.sweep import (sweep)
 
 from .dynamics.phases import (random_phases)
 
-from .dynamics.stability import (is_stable)
+from .dynamics.stability import (is_stable, e_p, a_p, delta_a, delta_e)
 
 from .radiation.equi_temperature import (temperature, std_temperature, mean_temperature)

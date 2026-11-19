@@ -53,20 +53,22 @@ def trajectory(sim, n_orbits=10, res_orbits=100):
     times = np.linspace(sim.t, sim.t + n_orbits*p.P, res_orbits)
     pos = np.zeros((len(times), sim.N, 3))
     v = np.zeros((len(times), sim.N, 3))
+    e = np.zeros((len(times), sim.N, 1))
+    a = np.zeros((len(times), sim.N, 1))
+
     t_real = np.zeros(len(times))
 
     for k, t in enumerate(times):
         sim.integrate(t, exact_finish_time=0)
         t_real[k] = sim.t
         com = sim.com(0, 2)
-        pos[k] = np.array([[b.x, b.y, b.z] for b in sim.particles]) - np.array([com.x, com.y, com.z])
-        v[k] = np.array([[b.vx, b.vy, b.vz] for b in sim.particles]) - np.array([com.vx, com.vy, com.vz])
 
-    return Trajectory(t=t_real, pos=pos, v=v)
+        pos[k] = np.array([[i.x, i.y, i.z] for i in sim.particles]) - np.array([com.x, com.y, com.z])
+        v[k] = np.array([[i.vx, i.vy, i.vz] for i in sim.particles]) - np.array([com.vx, com.vy, com.vz])
+        for j in range(1, sim.N):
+            e[k, j, 0] = sim.particles[j].e
+            a[k, j, 0] = sim.particles[j].a
 
-
-
-
-
+    return Trajectory(t=t_real, pos=pos, v=v, e=e, a=a)
 
 

@@ -208,6 +208,8 @@ class Trajectory:
     t: np.ndarray      # (n_times,) temps réels atteints, en années
     pos: np.ndarray
     v: np.ndarray
+    e: np.ndarray
+    a: np.ndarray
 
 
 @dataclass(frozen=True)
